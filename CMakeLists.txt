@@ -21,6 +21,11 @@ set(SOURCE_FILES
         src/pf_test3.cc
         src/redbase.h
         src/rm.h
+        src/rm_filehandle.cc
+        src/rm_filescan.cc
+        src/rm_manager.cc
+        src/rm_record.cc
+        src/rm_rid.cc
         src/rm_rid.h
         src/rm_test.cc
         src/statistics.cc

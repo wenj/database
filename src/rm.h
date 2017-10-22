@@ -3,12 +3,29 @@
 
 #include <cerrno>
 #include <iostream>
-#include "pm.h"
+#include "pf.h"
+#include "rm_rid.h"
+
+class RM_Manager;
+class RM_FileHandle;
+class RM_FileScan;
+class RM_Record;
+
+struct RM_FileHeader {
+    PageNum freePageHead;
+};
+
+struct RM_PageHeader {
+    SlotNum slotNum;
+    SlotNum freeSlotNum;
+    PageNum nextPage;
+};
 
 class RM_Manager {
 
 private:
 	PF_Manager &pfm;
+    int recordSize;
 
 public:
 	RM_Manager (PF_Manager &_pfm); // Constructor 
@@ -26,19 +43,21 @@ private:
 	bool attachedFile;
 	PF_FileHandle *fileHandle;
 	RM_FileHeader fileHeader;
+    int recordSize;
 
 public: 
 	RM_FileHandle (); // Constructor 
 	~RM_FileHandle (); // Destructor 
 
-	RC AttachFile(PF_FileHandle pffh);
-	RC UnattachFile(PF_FileHandle pffh);
+	RC AttachFile(PF_FileHandle &pffh, int recordSize);
+	RC UnattachFile();
+    RC UpdateFileHeader();
 
 	RC GetRec (const RID &rid, RM_Record &rec) const; // Get a record 
 	RC InsertRec (const char *pData, RID &rid); // Insert a new record, return record id 
 	RC DeleteRec (const RID &rid); // Delete a record 
 	RC UpdateRec (const RM_Record &rec); // Update a record 
-	RC ForcePages (PageNum pageNum = ALL_PAGES) const; // Write dirty page(s) to disk 
+	RC ForcePages (PageNum pageNum) const; // Write dirty page(s) to disk
 };
 
 class RM_FileScan { 
@@ -62,22 +81,27 @@ class RM_Record {
 
 	RID rid;
 	char *pdata;
+    int recordSize;
 
 public: 
 	RM_Record (); // Constructor 
 	~RM_Record (); // Destructor 
 
 	RC GetData (char *&pData) const; // Set pData to point to the record's contents 
-	RC GetRid (RID &rid) const; // Get the record id 
+	RC GetRid (RID &rid) const; // Get the record id
+    RC LoadData(char *&pData, int recordSize, RID rid);
 };
 
+#define RM_NULL -1
 
-struct RM_FileHeader {
-	PageNum freePageHead;
-};
+void RM_PrintError(RC rc);
 
-struct RM_PageHeader {
-
-};
+#define RM_HANDLEHASOPEN           (START_RM_ERR - 0)  //
+#define RM_SIZELIMITEXCEED         (START_RM_ERR - 1)
+#define RM_SIZEERROR               (START_RM_ERR - 2)
+#define RM_HANDLENOTOPEN           (START_RM_ERR - 3)
+#define RM_NORECORD                (START_RM_ERR - 4)
+//#define RM_RIDNOTEXIST             (START_RM_ERR - 5)
+#define RM_EOF                     (START_RM_ERR - 6)
 
 #endif

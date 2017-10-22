@@ -1,23 +1,23 @@
-#include "rid.h"
+#include "rm_rid.h"
 
-RID::RID () : pageNum(NULL_PAGE_NUM), slotNum(NULL_SLOT_NUM) {}
+RID::RID () : pageNum(NO_PAGE), slotNum(NO_SLOT) {}
 
 RID::~RID () {}
 
 RID::RID (PageNum pageNum, SlotNum slotNum): pageNum(pageNum), slotNum(slotNum) {}
 
 RC RID::GetPageNum (PageNum &pageNum) const {
-	if (this.pageNum == NULL_PAGE_NUM) {
-		return RM_RIDNONEXIST;
+	if (this -> pageNum == NO_PAGE) {
+		return RM_RIDNOTEXIST;
 	}
-	pageNum = this.pageNum;
+	pageNum = this -> pageNum;
 	return 0;
 }
 
 RC RID::GetSlotNum (SlotNum &slotNum) const {
-	if (this.slotNum == NULL_SLOT_NUM) {
-		return RM_RIDNONEXIST;
+	if (this -> slotNum == NO_SLOT) {
+		return RM_RIDNOTEXIST;
 	}
-	slotNum = this.slotNum;
+	slotNum = this -> slotNum;
 	return 0;
 }

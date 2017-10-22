@@ -1,13 +1,15 @@
+#include <cstring>
 #include "rm.h"
 
-RM_FileHandle::RM_FileHandle () : attachedFile(false), fileHandle(null) {}
+RM_FileHandle::RM_FileHandle () : attachedFile(false), fileHandle(NULL) {}
 
 RM_FileHandle::~RM_FileHandle () {
 	attachedFile = true;
 }
 
-RC RM_FileHandle::AttachFile(PF_FileHandle &pffh) {
+RC RM_FileHandle::AttachFile(PF_FileHandle &pffh, int recordSize) {
 	if (attachedFile) {
+        RM_PrintError(RM_HANDLEHASOPEN);
 		return RM_HANDLEHASOPEN;
 	}
 
@@ -15,12 +17,14 @@ RC RM_FileHandle::AttachFile(PF_FileHandle &pffh) {
 	PF_PageHandle pfph;
 	rc = pffh.GetFirstPage(pfph);
 	if (rc < 0) {
+        RM_PrintError(rc);
 		return rc;
 	}
 
 	char *pData;
-	rc = pfph.getData(pData);
+	rc = pfph.GetData(pData);
 	if (rc < 0) {
+        RM_PrintError(rc);
 		return rc;
 	}
 
@@ -28,21 +32,32 @@ RC RM_FileHandle::AttachFile(PF_FileHandle &pffh) {
 	PageNum pageNum;
 	rc = pfph.GetPageNum(pageNum);
 	if (rc < 0) {
+        RM_PrintError(rc);
 		return rc;
 	}
 	rc = pffh.UnpinPage(pageNum);
 	if (rc < 0) {
+        RM_PrintError(rc);
 		return rc;
 	}
 
 	attachedFile = true;
+    this -> recordSize = recordSize;
 	fileHandle = &pffh;
 	return 0;
 }
 
+RC RM_FileHandle::UnattachFile() {
+    if (!attachedFile) {
+        RM_PrintError(RM_HANDLENOTOPEN);
+        return RM_HANDLENOTOPEN;
+    }
+    return 0;
+}
+
 RC RM_FileHandle::GetRec (const RID &rid, RM_Record &rec) const {
 	if (!attachedFile) {
-		RM_PrintError(rc);
+		RM_PrintError(RM_HANDLENOTOPEN);
 		return RM_HANDLENOTOPEN;
 	}
 
@@ -62,14 +77,14 @@ RC RM_FileHandle::GetRec (const RID &rid, RM_Record &rec) const {
 	}
 
 	PF_PageHandle pfph;
-	rc = fileHandle.GetThisPage(pageNum, pfph);
+	rc = fileHandle -> GetThisPage(pageNum, pfph);
 	if (rc < 0) {
 		RM_PrintError(rc);
 		return rc;
 	}
 
 	char *pData;
-	rc = pfph.GetDate(pData);
+	rc = pfph.GetData(pData);
 	if (rc < 0) {
 		RM_PrintError(rc);
 		return rc;
@@ -99,7 +114,7 @@ RC RM_FileHandle::InsertRec (const char *pData, RID &rid) {
 	PageNum pageNum = fileHeader.freePageHead;
 	if (pageNum == RM_NULL) {
 		PF_PageHandle pfph;
-		rc = fileHandle.AllocatePage(pfph);
+		rc = fileHandle -> AllocatePage(pfph);
 		if (rc < 0) {
 			RM_PrintError(rc);
 			return rc;
@@ -112,16 +127,17 @@ RC RM_FileHandle::InsertRec (const char *pData, RID &rid) {
 		}
 
 		RM_PageHeader pageHeader;
-		pageHeader.freeSlotNum = (PM_PAGE_SIZE - sizeof(pageHeader)) / recordSize;
+		pageHeader.freeSlotNum = (PF_PAGE_SIZE - sizeof(pageHeader)) / recordSize;
 		pageHeader.slotNum = 0;
 		pageHeader.nextPage = RM_NULL;
 		fileHeader.freePageHead = pageNum;
-		pfph.UnpinPage(pageNum); 
-		UpdateFileHeader(fileHandle, fileHeader);
+        fileHandle -> MarkDirty(pageNum);
+		fileHandle -> UnpinPage(pageNum);
+		UpdateFileHeader();
 	}
 
 	PF_PageHandle pfph;
-	rc = fileHandle.GetThisPage(pageNum, pfph);
+	rc = fileHandle -> GetThisPage(pageNum, pfph);
 	if (rc < 0) {
 		RM_PrintError(rc);
 		return rc;
@@ -141,13 +157,21 @@ RC RM_FileHandle::InsertRec (const char *pData, RID &rid) {
 		pageHeader.nextPage = RM_NULL;
 	}
 	memcpy(data, &pageHeader, sizeof(pageHeader));
-	pfph.MarkDirty(pageNum);
+	rc = fileHandle -> MarkDirty(pageNum);
+    if (rc < 0) {
+        RM_PrintError(rc);
+        return rc;
+    }
 
 	data += sizeof(pageHeader) + (pageHeader.slotNum - 1) * recordSize;
 	memcpy(data, pData, recordSize);
-	pfph.UnpinPage(pageNum);
+	rc = fileHandle -> UnpinPage(pageNum);
+    if (rc < 0) {
+        RM_PrintError(rc);
+        return rc;
+    }
 
-	UpdateFileHeader(fileHandle, fileHeader);
+	UpdateFileHeader();
 	return 0;
 }
 
@@ -173,7 +197,7 @@ RC RM_FileHandle::DeleteRec (const RID &rid) {
 	}
 
 	PF_PageHandle pfph;
-	rc = fileHandle.GetThisPage(pageNum, pfph);
+	rc = fileHandle -> GetThisPage(pageNum, pfph);
 	if (rc < 0) {
 		RM_PrintError(rc);
 		return rc;
@@ -202,13 +226,67 @@ RC RM_FileHandle::DeleteRec (const RID &rid) {
 	if (pageHeader.freeSlotNum == 1) {
 		pageHeader.nextPage = fileHeader.freePageHead;
 		fileHeader.freePageHead = pageNum;
-		UpdateFileHeader(fileHandle, fileHeader);
+		UpdateFileHeader();
 	}
 
 	memcpy(pdata, &pageHeader, sizeof(pageHeader));
-	fileHandle.MarkDirty(pageNum);
-	fileHandle.UnpinPage(pageNum);
+	rc = fileHandle -> MarkDirty(pageNum);
+    if (rc < 0) {
+        RM_PrintError(rc);
+        return rc;
+    }
+
+	rc = fileHandle -> UnpinPage(pageNum);
+    if (rc < 0) {
+        RM_PrintError(rc);
+        return rc;
+    }
 	return 0;
+}
+
+RC RM_FileHandle::UpdateFileHeader() {
+    if (!attachedFile) {
+        RM_PrintError(RM_HANDLENOTOPEN);
+        return RM_HANDLENOTOPEN;
+    }
+
+    RC rc;
+    PF_PageHandle pfph;
+    rc = fileHandle -> GetFirstPage(pfph);
+    if (rc < 0) {
+        RM_PrintError(rc);
+        return rc;
+    }
+
+    char *pdata;
+    rc = pfph.GetData(pdata);
+    if (rc < 0) {
+        RM_PrintError(rc);
+        return rc;
+    }
+
+    memcpy(pdata, &fileHeader, sizeof(fileHeader));
+
+    PageNum pageNum;
+    rc = pfph.GetPageNum(pageNum);
+    if (rc < 0) {
+        RM_PrintError(rc);
+        return rc;
+    }
+
+    rc = fileHandle->MarkDirty(pageNum);
+    if (rc < 0) {
+        RM_PrintError(rc);
+        return rc;
+    }
+
+    rc = fileHandle->UnpinPage(pageNum);
+    if (rc < 0) {
+        RM_PrintError(rc);
+        return rc;
+    }
+
+    return 0;
 }
 
 RC RM_FileHandle::UpdateRec (const RM_Record &rec) {
