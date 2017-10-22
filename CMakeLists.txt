@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.8)
+project(database)
+
+set(CMAKE_CXX_STANDARD 11)
+
+set(SOURCE_FILES
+        pf.h
+        pf_buffermgr.cc
+        pf_buffermgr.h
+        pf_error.cc
+        pf_filehandle.cc
+        pf_hashtable.cc
+        pf_hashtable.h
+        pf_internal.h
+        pf_manager.cc
+        pf_manager_gtest.cc
+        pf_pagehandle.cc
+        pf_statistics.cc
+        pf_test1.cc
+        pf_test2.cc
+        pf_test3.cc
+        redbase.cc
+        redbase.h
+        rm.h
+        rm_filehandle.cc
+        rm_filescan.cc
+        rm_manager.cc
+        rm_record.cc
+        rm_rid.cc
+        rm_rid.h)
+
+add_executable(database ${SOURCE_FILES})

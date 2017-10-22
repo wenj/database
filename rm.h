@@ -3,11 +3,15 @@
 
 #include <cerrno>
 #include <iostream>
+#include "pm.h"
 
 class RM_Manager {
 
+private:
+	PF_Manager &pfm;
+
 public:
-	RM_Manager (PF_Manager &pfm); // Constructor 
+	RM_Manager (PF_Manager &_pfm); // Constructor 
 	~RM_Manager (); // Destructor 
 	
 	RC CreateFile (const char *fileName, int recordSize); // Create a new file 
@@ -18,9 +22,17 @@ public:
 
 class RM_FileHandle { 
 
+private:
+	bool attachedFile;
+	PF_FileHandle *fileHandle;
+	RM_FileHeader fileHeader;
+
 public: 
 	RM_FileHandle (); // Constructor 
 	~RM_FileHandle (); // Destructor 
+
+	RC AttachFile(PF_FileHandle pffh);
+	RC UnattachFile(PF_FileHandle pffh);
 
 	RC GetRec (const RID &rid, RM_Record &rec) const; // Get a record 
 	RC InsertRec (const char *pData, RID &rid); // Insert a new record, return record id 
@@ -48,6 +60,9 @@ public:
 
 class RM_Record { 
 
+	RID rid;
+	char *pdata;
+
 public: 
 	RM_Record (); // Constructor 
 	~RM_Record (); // Destructor 
@@ -56,8 +71,13 @@ public:
 	RC GetRid (RID &rid) const; // Get the record id 
 };
 
-export void RM_PrintError(RC rc) {
-	cerr << "Error code: " << rc << endl;
+
+struct RM_FileHeader {
+	PageNum freePageHead;
+}
+
+struct RM_PageHeader {
+
 }
 
 #endif

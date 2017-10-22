@@ -1,5 +1,8 @@
 class RID { 
 
+	const static int NULL_PAGE_NUM = -1;
+	const static int NULL_SLOT_NUM = -1;
+
 public: 
 	RID (); // Default constructor 
 	~RID (); // Destructor 

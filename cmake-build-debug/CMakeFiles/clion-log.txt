@@ -1,0 +1,66 @@
+"D:\Program Files\JetBrains\CLion 2017.2.3\bin\cmake\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" E:\THU\大三上\数据库\database
+-- The C compiler identification is GNU 4.9.2
+-- The CXX compiler identification is GNU 4.9.2
+-- Check for working C compiler: C:/Program Files (x86)/Dev-Cpp/MinGW64/bin/gcc.exe
+-- Check for working C compiler: C:/Program Files (x86)/Dev-Cpp/MinGW64/bin/gcc.exe -- broken
+CMake Error at D:/Program Files/JetBrains/CLion 2017.2.3/bin/cmake/share/cmake-3.8/Modules/CMakeTestCCompiler.cmake:51 (message):
+  The C compiler "C:/Program Files (x86)/Dev-Cpp/MinGW64/bin/gcc.exe" is not
+  able to compile a simple test program.
+
+  It fails with the following output:
+
+   Change Dir: E:/THU/澶т笁涓�/鏁版嵁搴�/database/cmake-build-debug/CMakeFiles/CMakeTmp
+
+  
+
+  Run Build Command:"C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe"
+  "cmTC_92428/fast"
+
+  C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f
+  CMakeFiles\cmTC_92428.dir\build.make CMakeFiles/cmTC_92428.dir/build
+
+  mingw32-make.exe[1]: Entering directory
+  'E:/THU/澶т笁涓�/鏁版嵁搴�/database/cmake-build-debug/CMakeFiles/CMakeTmp'
+
+
+  Building C object CMakeFiles/cmTC_92428.dir/testCCompiler.c.obj
+
+  C:\PROGRA~2\Dev-Cpp\MinGW64\bin\gcc.exe -o
+  CMakeFiles\cmTC_92428.dir\testCCompiler.c.obj -c
+  E:\THU\婢堆傜瑏娑撳ガ閺佺増宓佹惔鎻琩atabase\cmake-build-debug\CMakeFiles\CMakeTmp\testCCompiler.c
+
+
+  gcc.exe: error:
+  E:\THU\婢堆傜瑏娑撳ガ閺佺増宓佹惔鎻琩atabase\cmake-build-debug\CMakeFiles\CMakeTmp\testCCompiler.c:
+  No such file or directory
+
+  gcc.exe: fatal error: no input files
+
+  compilation terminated.
+
+  CMakeFiles\cmTC_92428.dir\build.make:64: recipe for target
+  'CMakeFiles/cmTC_92428.dir/testCCompiler.c.obj' failed
+
+  mingw32-make.exe[1]: *** [CMakeFiles/cmTC_92428.dir/testCCompiler.c.obj]
+  Error 1
+
+  mingw32-make.exe[1]: Leaving directory
+  'E:/THU/澶т笁涓�/鏁版嵁搴�/database/cmake-build-debug/CMakeFiles/CMakeTmp'
+
+
+  Makefile:125: recipe for target 'cmTC_92428/fast' failed
+
+  mingw32-make.exe: *** [cmTC_92428/fast] Error 2
+
+  
+
+  
+
+  CMake will not be able to correctly generate this project.
+Call Stack (most recent call first):
+  CMakeLists.txt:2 (project)
+
+
+-- Configuring incomplete, errors occurred!
+See also "E:/THU/澶т笁涓�/鏁版嵁搴�/database/cmake-build-debug/CMakeFiles/CMakeOutput.log".
+See also "E:/THU/澶т笁涓�/鏁版嵁搴�/database/cmake-build-debug/CMakeFiles/CMakeError.log".
