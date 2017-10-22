@@ -6,9 +6,6 @@
 #define REDBASE_H
 
 // Please DO NOT include any other files in this file.
-#include <iostream>
-#include <cmath>
-#include <cassert>
 
 //
 // Globally-useful defines
@@ -20,7 +17,6 @@
 #define MAXATTRS      40                // maximum number of attributes
                                         // in a relation
 
-#define YY_SKIP_YYWRAP 1
 #define yywrap() 1
 void yyerror(const char *);
 
@@ -72,15 +68,6 @@ enum AttrType {
 enum CompOp {
     NO_OP,                                      // no comparison
     EQ_OP, NE_OP, LT_OP, GT_OP, LE_OP, GE_OP    // binary atomic operators
-};
-
-//
-// Aggregation functions for group by
-//
-enum AggFun {
-  NO_F,
-  MIN_F, MAX_F, COUNT_F, 
-  SUM_F, AVG_F           // numeric args only
 };
 
 //
