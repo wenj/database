@@ -5,7 +5,7 @@
 
 typedef int SlotNum; // 第几个slot
 
-#define RM_RIDNOTEXIST             (START_RM_ERR - 5)
+#define RM_RIDNOTEXIST             (START_RM_ERR - 4)
 
 class RID {
 

@@ -1,12 +1,18 @@
 #include <cstring>
 #include "rm.h"
 
-RM_FileHandle::RM_FileHandle () : attachedFile(false), fileHandle(NULL) {}
+RM_FileHandle::RM_FileHandle () : attachedFile(false), fileHandle(nullptr) {}
 
 RM_FileHandle::~RM_FileHandle () {
 	attachedFile = true;
 }
 
+/**
+ * 在这个句柄上打开一个文件
+ * @param pffh
+ * @param recordSize
+ * @return
+ */
 RC RM_FileHandle::AttachFile(PF_FileHandle &pffh, int recordSize) {
 	if (attachedFile) {
         RM_PrintError(RM_HANDLEHASOPEN);
@@ -55,6 +61,12 @@ RC RM_FileHandle::UnattachFile() {
     return 0;
 }
 
+/**
+ * 从文件中获取用rid标识的记录
+ * @param rid 传入rid作为参数
+ * @param rec 传出取出的rec
+ * @return 如果文件没有打开，返回正值
+ */
 RC RM_FileHandle::GetRec (const RID &rid, RM_Record &rec) const {
 	if (!attachedFile) {
 		RM_PrintError(RM_HANDLENOTOPEN);
